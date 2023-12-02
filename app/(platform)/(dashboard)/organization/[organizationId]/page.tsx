@@ -1,5 +1,24 @@
-const OrganizationPage = () => {
-  return <div>Organization Page</div>
+import { db } from '@/lib/db'
+import { Board } from './board'
+import { Form } from './form'
+
+const OrganizationIdPage = async () => {
+  const boards = await db.board.findMany()
+
+  return (
+    <div>
+      <div className="space-y-2">
+        <Form />
+        {boards.map((board) => (
+          <Board
+            id={board.id}
+            title={board.title}
+            key={board.id}
+          />
+        ))}
+      </div>
+    </div>
+  )
 }
 
-export default OrganizationPage
+export default OrganizationIdPage
