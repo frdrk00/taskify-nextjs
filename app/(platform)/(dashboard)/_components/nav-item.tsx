@@ -1,7 +1,7 @@
 'use client'
 
-import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
+import Image from 'next/image'
 import { Activity, CreditCard, Layout, Settings } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -20,14 +20,14 @@ interface NavItemProps {
   isExpanded: boolean
   isActive: boolean
   organization: Organization
-  onExpanded: (id: string) => void
+  onExpand: (id: string) => void
 }
 
-export const NavItem = ({ isExpanded, isActive, organization, onExpanded }: NavItemProps) => {
+export const NavItem = ({ isExpanded, isActive, organization, onExpand }: NavItemProps) => {
   const router = useRouter()
   const pathname = usePathname()
 
-  const routers = [
+  const routes = [
     {
       label: 'Boards',
       icon: <Layout className="h-4 w-4 mr-2" />,
@@ -59,9 +59,9 @@ export const NavItem = ({ isExpanded, isActive, organization, onExpanded }: NavI
       value={organization.id}
       className="border-none">
       <AccordionTrigger
-        onClick={() => onExpanded(organization.id)}
+        onClick={() => onExpand(organization.id)}
         className={cn(
-          'flex items-center gap-x-2 p-1.5 text-neutral-700 rounded-md hover:bg-neutral-500/10 transition text-start no-underline',
+          'flex items-center gap-x-2 p-1.5 text-neutral-700 rounded-md hover:bg-neutral-500/10 transition text-start no-underline hover:no-underline',
           isActive && !isExpanded && 'bg-sky-500/10 text-sky-700'
         )}>
         <div className="flex items-center gap-x-2">
@@ -77,7 +77,7 @@ export const NavItem = ({ isExpanded, isActive, organization, onExpanded }: NavI
         </div>
       </AccordionTrigger>
       <AccordionContent className="pt-1 text-neutral-700">
-        {routers.map((route) => (
+        {routes.map((route) => (
           <Button
             key={route.href}
             size="sm"
@@ -96,7 +96,7 @@ export const NavItem = ({ isExpanded, isActive, organization, onExpanded }: NavI
   )
 }
 
-NavItem.Skeleton = function NavItemSkeleton() {
+NavItem.Skeleton = function SkeletonNavItem() {
   return (
     <div className="flex items-center gap-x-2">
       <div className="w-10 h-10 relative shrink-0">
