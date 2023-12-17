@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useAction } from '@/hooks/use-action'
+import { useProModal } from '@/hooks/use-pro-modal'
 import { createBoard } from '@/actions/create-board/index.ts'
 
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -24,6 +25,7 @@ interface FormPopoverProps {
 export const FormPopover = ({ children, side = 'bottom', align, sideOffset = 0 }: FormPopoverProps) => {
   const router = useRouter()
   const closeRef = useRef<ElementRef<'button'>>(null)
+  const proModal = useProModal()
 
   const { execute, fieldErrors } = useAction(createBoard, {
     onSuccess: (data) => {
@@ -32,8 +34,8 @@ export const FormPopover = ({ children, side = 'bottom', align, sideOffset = 0 }
       router.push(`/board/${data.id}`)
     },
     onError: (error) => {
-      console.log({ error })
       toast.error(error)
+      proModal.onOpen()
     }
   })
 

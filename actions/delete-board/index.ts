@@ -7,6 +7,8 @@ import { ACTION, ENTITY_TYPE } from '@prisma/client'
 
 import { createSafeAction } from '@/lib/create-safe-action'
 import { createAuditLog } from '@/lib/create-audit-log'
+import { decreaseAvailableCount } from '@/lib/org-limit'
+import { checkSubscription } from '@/lib/subscription'
 import { db } from '@/lib/db'
 
 import { DeleteBoard } from './schema'
@@ -19,6 +21,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     return { error: 'Unauthorized' }
   }
 
+  const isPro = checkSubscription()
+
   const { id } = data
   let board
 
@@ -29,6 +33,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         orgId
       }
     })
+
+    if (!isPro) {
+      await decreaseAvailableCount()
+    }
 
     await createAuditLog({
       entityTitle: board.title,

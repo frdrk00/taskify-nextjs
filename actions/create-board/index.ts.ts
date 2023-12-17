@@ -4,12 +4,14 @@ import { auth } from '@clerk/nextjs'
 import { revalidatePath } from 'next/cache'
 import { ACTION, ENTITY_TYPE } from '@prisma/client'
 
+import { incrementAvailableCount, hasAvailableCount } from '@/lib/org-limit'
 import { createSafeAction } from '@/lib/create-safe-action'
 import { createAuditLog } from '@/lib/create-audit-log'
 import { db } from '@/lib/db'
 
 import { CreateBoard } from './schema'
 import { InputType, ReturnType } from './types'
+import { checkSubscription } from '@/lib/subscription'
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = auth()
@@ -20,17 +22,18 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     }
   }
 
+  const canCreate = await hasAvailableCount()
+  const isPro = await checkSubscription()
+
+  if (!canCreate || !isPro) {
+    return {
+      error: 'You have reached your limit of free boards. Please upgrade to create more.'
+    }
+  }
+
   const { title, image } = data
 
   const [imageId, imageThumbUrl, imageFullUrl, imageUserName, imageLinkHTML] = image.split('|')
-
-  console.log({
-    imageId,
-    imageThumbUrl,
-    imageFullUrl,
-    imageUserName,
-    imageLinkHTML
-  })
 
   if (!imageId || !imageThumbUrl || !imageFullUrl || !imageUserName || !imageLinkHTML) {
     return {
@@ -52,6 +55,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         imageLinkHTML
       }
     })
+
+    if (!isPro) {
+      await incrementAvailableCount()
+    }
 
     await createAuditLog({
       entityTitle: board.title,
